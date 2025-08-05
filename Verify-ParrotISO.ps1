@@ -52,8 +52,10 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 # Vérification des droits d'administrateur
 function Test-IsAdministrator {
     # Cas Docker : on ignore la vérification
-    if ($env:DOTNET_RUNNING_IN_CONTAINER -eq "true") {
-        Write-Host "🛡️ Exécution dans un conteneur — vérification d'administrateur ignorée."
+    # Vérifie si on est dans Docker (Linux)
+    $IsDocker = Test-Path "/.dockerenv"
+    if ($IsDocker) {
+        Write-Host "🛡️ Exécution dans un conteneur Docker — vérification d'administrateur ignorée."
         return $true
     }
 
