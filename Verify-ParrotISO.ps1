@@ -43,13 +43,45 @@ param (
     [switch]$DryRun
 )
 
-# Vérification des droits d'administrateur
-# Le script doit être exécuté en tant qu'administrateur pour fonctionner correctement
-function Test-IsAdministrator {
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+# 🧪 Vérification de la version de PowerShell (>= 7.0)
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "❌ Ce script nécessite PowerShell 7.0 ou supérieur." -ForegroundColor Red
+    exit 1
 }
+
+# Vérification des droits d'administrateur
+function Test-IsAdministrator {
+    # Cas Docker : on ignore la vérification
+    # Vérifie si on est dans Docker (Linux)
+    $IsDocker = Test-Path "/.dockerenv"
+    if ($IsDocker) {
+        Write-Host "🛡️ Exécution dans un conteneur Docker — vérification d'administrateur ignorée."
+        return $true
+    }
+
+    # Cas Windows
+    if ($IsWindows) {
+        try {
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+            $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+            return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        }
+        catch {
+            Write-Warning "⚠️ Impossible de vérifier les privilèges administrateur sur Windows : $_"
+            return $false
+        }
+    }
+
+    # Cas Linux/macOS
+    if ($IsLinux -or $IsMacOS) {
+        return ($env:USER -eq "root")
+    }
+
+    # OS non supporté
+    Write-Warning "❌ Système d'exploitation non reconnu. Vérification des privilèges impossible."
+    return $false
+}
+
 
 if (-not $DryRun -and -not (Test-IsAdministrator)) {
     Write-Host "❌ Ce script doit être exécuté en tant qu’administrateur pour fonctionner normalement." -ForegroundColor Yellow
