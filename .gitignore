@@ -1,0 +1,17 @@
+# 🧠 Fichiers téléchargés par le script
+Parrot-security-6.4_amd64.iso
+signed-hashes.txt
+archive.gpg
+
+# 🛠️ Fichiers temporaires ou de logs
+*.log
+*.tmp
+*.bak
+*.old
+
+# 💻 Dossier VS Code
+.vscode/
+
+# 🧼 Fichiers système
+Thumbs.db
+.DS_Store
