@@ -5,8 +5,10 @@ Ce script PowerShell importe une clé GPG, tente de récupérer automatiquement 
 
 En cas de doute n'hesitez pas d'aller directement sur <https://parrotsec.org/> et faire comme vous faites d'habitude.
 
-## Prérequis  
+## ⚙️ Prérequis
 
+- PowerShell **7.0 ou supérieur** (le script vérifie automatiquement la version)
+- GnuPG installé (dans l’environnement ou le conteneur)
 - Windows 10 ou 11
 - winget installé (disponible par défaut sur les dernières versions de Windows)
 - Droits suffisants pour exécuter des scripts PowerShell
@@ -60,6 +62,16 @@ Force le téléchargement des fichiers avant de procéder à la vérification.
 ```powershell
 .\Verify-ParrotISO.ps1 -Force
 ```
+
+## 🔐 Vérification des privilèges
+
+Le script `Verify-ParrotISO.ps1` vérifie automatiquement les privilèges d'exécution selon le système :
+
+- **Windows** : nécessite l'exécution en tant qu'administrateur.
+- **Linux/macOS** : nécessite l'exécution en tant que `root`.
+- **Docker** : la vérification est ignorée, car les conteneurs sont généralement exécutés en tant que root par défaut.
+
+Cette logique permet de conserver un comportement cohérent et **multiplateforme**, tout en évitant les erreurs liées aux permissions insuffisantes.
 
 ## Comportement attendu
 

@@ -43,12 +43,43 @@ param (
     [switch]$DryRun
 )
 
+# 🧪 Vérification de la version de PowerShell (>= 7.0)
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "❌ Ce script nécessite PowerShell 7.0 ou supérieur." -ForegroundColor Red
+    exit 1
+}
+
 # Vérification des droits d'administrateur
 # Le script doit être exécuté en tant qu'administrateur pour fonctionner correctement
+# 
 function Test-IsAdministrator {
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    #$identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    #$principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    #return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    # Vérification des privilèges selon l'OS
+    if ($env:DOTNET_RUNNING_IN_CONTAINER -eq "true") {
+        Write-Host "🛡️ Exécution dans un conteneur — vérification d'administrateur ignorée."
+        #return $true
+    }
+    elseif ($IsWindows) {
+        $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+        $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+        if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+            Write-Warning "Ce script doit être exécuté en tant qu'administrateur sur Windows."
+            exit 1
+        }
+    }
+    elseif ($IsLinux -or $IsMacOS) {
+        if ($env:USER -ne "root") {
+            Write-Warning "Ce script doit être exécuté en tant que root sur Linux/macOS."
+            exit 1
+        }
+    }
+    else {
+        Write-Warning "Système d'exploitation non supporté. Ce script est conçu pour Windows, Linux et macOS."
+        exit 1
+    }
+    return $true
 }
 
 if (-not $DryRun -and -not (Test-IsAdministrator)) {

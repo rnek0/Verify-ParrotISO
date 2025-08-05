@@ -15,3 +15,6 @@ archive.gpg
 # 🧼 Fichiers système
 Thumbs.db
 .DS_Store
+
+# 🗑️ Fichiers isos téléchargés avec docker
+isos/
