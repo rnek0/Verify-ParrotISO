@@ -50,8 +50,6 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 }
 
 # Vérification des droits d'administrateur
-# Le script doit être exécuté en tant qu'administrateur pour fonctionner correctement
-# 
 function Test-IsAdministrator {
     # Cas Docker : on ignore la vérification
     if ($env:DOTNET_RUNNING_IN_CONTAINER -eq "true") {
