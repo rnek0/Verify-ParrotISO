@@ -53,34 +53,35 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 # Le script doit être exécuté en tant qu'administrateur pour fonctionner correctement
 # 
 function Test-IsAdministrator {
-    #$identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    #$principal = New-Object Security.Principal.WindowsPrincipal($identity)
-    #return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    # Vérification des privilèges selon l'OS
+    # Cas Docker : on ignore la vérification
     if ($env:DOTNET_RUNNING_IN_CONTAINER -eq "true") {
         Write-Host "🛡️ Exécution dans un conteneur — vérification d'administrateur ignorée."
-        #return $true
+        return $true
     }
-    elseif ($IsWindows) {
-        $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-        $principal = New-Object Security.Principal.WindowsPrincipal($identity)
-        if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-            Write-Warning "Ce script doit être exécuté en tant qu'administrateur sur Windows."
-            exit 1
+
+    # Cas Windows
+    if ($IsWindows) {
+        try {
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+            $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+            return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        }
+        catch {
+            Write-Warning "⚠️ Impossible de vérifier les privilèges administrateur sur Windows : $_"
+            return $false
         }
     }
-    elseif ($IsLinux -or $IsMacOS) {
-        if ($env:USER -ne "root") {
-            Write-Warning "Ce script doit être exécuté en tant que root sur Linux/macOS."
-            exit 1
-        }
+
+    # Cas Linux/macOS
+    if ($IsLinux -or $IsMacOS) {
+        return ($env:USER -eq "root")
     }
-    else {
-        Write-Warning "Système d'exploitation non supporté. Ce script est conçu pour Windows, Linux et macOS."
-        exit 1
-    }
-    return $true
+
+    # OS non supporté
+    Write-Warning "❌ Système d'exploitation non reconnu. Vérification des privilèges impossible."
+    return $false
 }
+
 
 if (-not $DryRun -and -not (Test-IsAdministrator)) {
     Write-Host "❌ Ce script doit être exécuté en tant qu’administrateur pour fonctionner normalement." -ForegroundColor Yellow

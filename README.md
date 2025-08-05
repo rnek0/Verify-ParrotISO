@@ -65,11 +65,14 @@ Force le téléchargement des fichiers avant de procéder à la vérification.
 
 ## 🔐 Vérification des privilèges
 
-Le script `Verify-ParrotISO.ps1` vérifie automatiquement les privilèges d'exécution selon le système :
+Le script `Verify-ParrotISO.ps1` vérifie automatiquement les privilèges d'exécution :
 
 - **Windows** : nécessite l'exécution en tant qu'administrateur.
 - **Linux/macOS** : nécessite l'exécution en tant que `root`.
-- **Docker** : la vérification est ignorée, car les conteneurs sont généralement exécutés en tant que root par défaut.
+- **Docker** : la vérification est ignorée, car les conteneurs sont généralement exécutés en tant que root.
+
+La vérification est désactivée si l'option `-DryRun` est utilisée.
+
 
 Cette logique permet de conserver un comportement cohérent et **multiplateforme**, tout en évitant les erreurs liées aux permissions insuffisantes.
 
